@@ -14,12 +14,25 @@ api = Api(app)
 
 print('test')
 
-class HelloWorld(Resource):
+
+class Recommendations(Resource):
     def get(self, title):
         print(title)
         return {'hello': 'world'}
 
-api.add_resource(HelloWorld, '/<string:title>')
+
+api.add_resource(Recommendations, '/movies/<string:title>')
+
+class Movies(Resource):
+    def get(self):
+        print('in Movies route')
+        movie_titles = list(pd.read_csv('./data/movies.csv', sep=',')['title'])
+        # print(movie_titles)
+        return jsonify({'movie_titles': movie_titles})
+        # return{'movie_titles': movie_titles}
+        # return {'hello': 'world'}
+
+api.add_resource(Movies, '/movies')
 
 # data frame read the csv, data is separated by commas
 df = pd.read_csv('./data/ratings.csv', sep=',')
@@ -27,7 +40,7 @@ df = pd.read_csv('./data/ratings.csv', sep=',')
 df.head()
 # read movies.csv
 movie_titles = pd.read_csv('./data/movies.csv', sep=',')
-movie_titles.head()
+# print(movie_titles.head())
 # ratings.csv and movies.csv
 df = pd.merge(df, movie_titles, on='movieId')
 # print(df.head())
