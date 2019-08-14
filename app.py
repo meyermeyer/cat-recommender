@@ -1,7 +1,7 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
+import seaborn as sns
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as mp
 import warnings
@@ -11,25 +11,15 @@ warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 api = Api(app)
+
 print('test')
 
+class HelloWorld(Resource):
+    def get(self, title):
+        print(title)
+        return {'hello': 'world'}
 
-class Movies(Resource):
-    def get(self):
-        
-        return 'test'
-
-
-# @app.route('/greet')
-# def say_hello():
-#   return 'Hello from Server'
-
-# @app.route('/movie', methods=['GET'])
-
-# def movieRoutes():
-#     if request.method == 'GET':
-#         print(request.query)
-#         return 200
+api.add_resource(HelloWorld, '/<string:title>')
 
 # data frame read the csv, data is separated by commas
 df = pd.read_csv('./data/ratings.csv', sep=',')
@@ -99,7 +89,5 @@ corr_contact = corr_contact.join(ratings['number_of_ratings'])
 
 # print(corr_contact[corr_contact['number_of_ratings']>100].sort_values(by='Correlation', ascending=False).head(10))
 
-api.add_resource(Movies, '/movies')
-
 if __name__ == '__main__':
-     app.run(port='5002')
+    app.run(debug=True)
