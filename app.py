@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 from flask import Flask, jsonify, request
+from flask_restful import Resource, Api
 import pandas as pd
 import numpy as mp
 import warnings
@@ -9,7 +10,27 @@ warnings.filterwarnings('ignore')
 # app.debug = True
 
 app = Flask(__name__)
+api = Api(app)
 print('test')
+
+
+class Movies(Resource):
+    def get(self):
+        
+        return 'test'
+
+
+# @app.route('/greet')
+# def say_hello():
+#   return 'Hello from Server'
+
+# @app.route('/movie', methods=['GET'])
+
+# def movieRoutes():
+#     if request.method == 'GET':
+#         print(request.query)
+#         return 200
+
 # data frame read the csv, data is separated by commas
 df = pd.read_csv('./data/ratings.csv', sep=',')
 # shows first 5 rows 
@@ -66,9 +87,19 @@ corr_AFO = pd.DataFrame(similar_to_AFO, columns = ['Correlation'])
 corr_AFO.dropna(inplace=True)
 # print(corr_AFO.sort_values('Correlation', ascending=False).head())
 
-# set a threshold for number of ratings
+
 
 # join correlations with number of ratings column in the ratings datafield
 corr_AFO = corr_AFO.join(ratings['number_of_ratings'])
 corr_contact = corr_contact.join(ratings['number_of_ratings'])
-print(corr_AFO.head(), corr_contact.head())
+# print(corr_AFO.head(), corr_contact.head())
+
+# set a threshold for number of ratings
+# print(corr_AFO[corr_AFO['number_of_ratings']>100].sort_values(by='Correlation', ascending=False).head(10))
+
+# print(corr_contact[corr_contact['number_of_ratings']>100].sort_values(by='Correlation', ascending=False).head(10))
+
+api.add_resource(Movies, '/movies')
+
+if __name__ == '__main__':
+     app.run(port='5002')
