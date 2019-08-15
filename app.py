@@ -54,8 +54,9 @@ class Recommendations(Resource):
         # join correlations with number of ratings column in the ratings datafield
         corr_title = corr_title.join(ratings['number_of_ratings'])
         # set a threshold for number of ratings
-        top_ten = corr_title[corr_title['number_of_ratings']>100].sort_values(by='Correlation', ascending=False).head(10)
-        json_object = top_ten.to_dict('index')
+        top_eleven = corr_title[corr_title['number_of_ratings']>100].sort_values(by='Correlation', ascending=False).head(11)
+        #  use to_dict to convert to dictionary, exclude 'title' by requiring correlation less than .99
+        json_object = top_eleven[top_eleven['Correlation']<.99].to_dict('index')
         print(json_object)
         return {'recommendations': json_object}
         # return {'hello': 'world'}
