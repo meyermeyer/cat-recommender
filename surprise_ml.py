@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from surprise import Reader, Dataset
-
+from surprise import SVD, evaluate
+from surprise import NMF
 import pandas as pd
 
 
@@ -23,9 +24,18 @@ df = pd.DataFrame(ratings_dict)
 
 reader = Reader(rating_scale=(0.5,5.0))
 
-data = Dataset.load_from_df(df[['userID', 'itemID', 'rating']],reader)
+data = Dataset.load_from_df(df[['userID', 'itemID', 'rating']], reader)
 
-print(data)
+# split data into 5 folds
+data.split(n_folds=5)
+
+# SVD - Singular Value Decomposition
+algo = SVD()
+evaluate(algo, data, measures=['RMSE'])
+
+# NMF - non negative matrix factorization
+algo = NMF()
+evaluate(algo, data, measures=['RMSE'])
 
 
 if __name__ == '__main__':
