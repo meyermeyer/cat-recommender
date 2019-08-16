@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 api = Api(app)
 
-print('test')
+# print('test')
 
 # data frame read the csv, data is separated by commas
 df = pd.read_csv('./data/ratings.csv', sep=',')
@@ -36,7 +36,7 @@ ratings['number_of_ratings'] = df.groupby('title')['rating'].count()
 
 # create a matrix with movie titles as columns, userId as indexes, and ratings as values
 movie_matrix = df.pivot_table(index='userId', columns='title', values='rating')
-# print(movie_matrix)
+print(movie_matrix)
 
 class Recommendations(Resource):
     def get(self, title):
@@ -58,7 +58,10 @@ class Recommendations(Resource):
         #  use to_dict to convert to dictionary, exclude 'title' by requiring correlation less than .99
         json_object = top_eleven[top_eleven['Correlation']<.99].to_dict('index')
         print(json_object)
-        return {'recommendations': json_object}
+        if json_object == {} :
+            return {'recommendations' : 'none'}
+        else :
+            return {'recommendations': json_object}
         # return {'hello': 'world'}
 
 
