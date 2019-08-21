@@ -4,7 +4,16 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as mp
+from surprise import Reader, Dataset
+from surprise.model_selection import train_test_split
+from surprise import SVD, evaluate
+from surprise import NMF
+from collections import defaultdict
 import warnings
+
+import surprise_ml
+from surprise_ml import svd_movie_matrix
+
 warnings.filterwarnings('ignore')
 
 # app.debug = True
@@ -33,10 +42,11 @@ ratings = pd.DataFrame(df.groupby('title')['rating'].mean())
 
 # create a column to display number of ratings
 ratings['number_of_ratings'] = df.groupby('title')['rating'].count()
+print(ratings['number_of_ratings'])
 
 # create a matrix with movie titles as columns, userId as indexes, and ratings as values
 movie_matrix = df.pivot_table(index='userId', columns='title', values='rating')
-print(movie_matrix)
+# print(movie_matrix)
 
 class Recommendations(Resource):
     def get(self, title):
@@ -66,6 +76,47 @@ class Recommendations(Resource):
 
 
 api.add_resource(Recommendations, '/movies/recommendations/<string:title>')
+
+
+class SvdRecommendations(Resource):
+    def get(self, title):
+        print('title', title)
+        iid = movie_titles.loc[movie_titles['title']
+                               == title, 'movieId'].item()
+        print(iid)
+
+        # all ratings for selected title
+        title_user_rating = svd_movie_matrix[iid]
+        print('title_user_rating',title_user_rating)
+        # correlation to title
+        similar_to_title = svd_movie_matrix.corrwith(title_user_rating)
+        print(similar_to_title)
+        # drop null values from matrix and transform correlation results into DataFrame
+        corr_title = pd.DataFrame(
+            data=similar_to_title, columns=['Correlation'])
+        
+        print('corr_title', corr_title.sort_values(by='Correlation', ascending=False))
+
+        # set a threshold for number of ratings
+        top_eleven = corr_title.sort_values(
+            by='Correlation', ascending=False).head(11)
+        
+        top_eleven = pd.merge(top_eleven, movie_titles, on='movieId')
+        print('top_eleven', top_eleven)
+       
+       
+        #  use to_dict to convert to dictionary, exclude 'title' by requiring correlation less than .99
+        json_object = top_eleven[top_eleven['Correlation'] < .99].to_dict(
+            'index')
+
+        print(json_object)
+        if json_object == {}:
+            return {'recommendations': 'none'}
+        else:
+            return {'recommendations': json_object}
+
+api.add_resource(SvdRecommendations, '/movies/recommendations/SVD/<string:title>')
+
 
 class Movies(Resource):
     def get(self):
