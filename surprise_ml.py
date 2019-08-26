@@ -36,6 +36,9 @@ movie_matrix = df.pivot_table(
 data = Dataset.load_builtin('ml-100k')
 print(data)
 trainset = data.build_full_trainset()
+
+
+
 algo = SVD()
 algo.fit(trainset)
 
@@ -54,42 +57,21 @@ for uid, iid, true_r, est, _ in predictions:
 svd_movie_matrix = movie_matrix.fillna(all_predictions[uid][iid])
 
 
-class Recommendations(Resource):
-    def get(self, title):
-        print('title', title)
-        iid = movie_titles.loc[movie_titles['title'] == title, 'movieId'].item()
-        print(iid)
-    
-        # all ratings for selected title
-        title_user_rating = svd_movie_matrix[iid]
-        # print(title_user_rating)
-        # correlation to title
-        similar_to_title = svd_movie_matrix.corrwith(title_user_rating)
-        print(similar_to_title)
-        # drop null values from matrix and transform correlation results into DataFrame
-        corr_title = pd.DataFrame(
-            data=similar_to_title, columns=['Correlation'])
-        corr_title.dropna(inplace=True)
-        # join correlations with number of ratings column in the ratings datafield
-        corr_title = corr_title.join(ratings['number_of_ratings'])
-        # set a threshold for number of ratings
-        top_eleven = corr_title[corr_title['number_of_ratings'] > 100].sort_values(
-            by='Correlation', ascending=False).head(11)
-        #  use to_dict to convert to dictionary, exclude 'title' by requiring correlation less than .99
-        json_object = top_eleven[top_eleven['Correlation'] < .99].to_dict(
-            'index')
-        print(json_object)
-        if json_object == {}:
-            return {'recommendations': 'none'}
-        else:
-            return {'recommendations': json_object}
-
-        # return {'hello': 'world'}
-
-api.add_resource(Recommendations, '/movies/recommendations/SVD/<string:title>')
-
 # NMF - non negative matrix factorization
-algo = NMF()
+nmfAlgo = NMF()
+nmfAlgo.fit(trainset)
+nmf_predictions = nmfAlgo.test(testset)
+# print(nmf_predictions)
+
+all_nmf_predictions = {}
+all_nmf_predictions['uid'] = {}
+all_nmf_predictions['uid']['iid'] = 'est'
+
+for uid,iid, true_r, est, _ in nmf_predictions:
+    all_nmf_predictions[uid] = {}
+    all_nmf_predictions[uid][iid] = est
+
+nmf_movie_matrix = movie_matrix.fillna(all_nmf_predictions[uid][iid])
 # evaluate(algo, data, measures=['RMSE'])
 
 

@@ -13,6 +13,7 @@ import warnings
 
 import surprise_ml
 from surprise_ml import svd_movie_matrix
+from surprise_ml import nmf_movie_matrix
 
 warnings.filterwarnings('ignore')
 
@@ -50,7 +51,6 @@ movie_matrix = df.pivot_table(index='userId', columns='title', values='rating')
 
 class Recommendations(Resource):
     def get(self, title):
-        
         # all ratings for selected title
         title_user_rating = movie_matrix[title]
         # print(title_user_rating)
@@ -87,9 +87,50 @@ class SvdRecommendations(Resource):
 
         # all ratings for selected title
         title_user_rating = svd_movie_matrix[iid]
-        print('title_user_rating',title_user_rating)
+        print('title_user_rating', title_user_rating)
         # correlation to title
         similar_to_title = svd_movie_matrix.corrwith(title_user_rating)
+        print(similar_to_title)
+        # drop null values from matrix and transform correlation results into DataFrame
+        corr_title = pd.DataFrame(
+            data=similar_to_title, columns=['Correlation'])
+
+        print('corr_title', corr_title.sort_values(
+            by='Correlation', ascending=False))
+
+        # set a threshold for number of ratings
+        top_eleven = corr_title.sort_values(
+            by='Correlation', ascending=False).head(11)
+
+        top_eleven = pd.merge(top_eleven, movie_titles, on='movieId')
+        print('top_eleven', top_eleven)
+
+        #  use to_dict to convert to dictionary, exclude 'title' by requiring correlation less than .99
+        json_object = top_eleven[top_eleven['Correlation'] < .99].to_dict(
+            'index')
+
+        print(json_object)
+        if json_object == {}:
+            return {'recommendations': 'none'}
+        else:
+            return {'recommendations': json_object}
+
+
+api.add_resource(SvdRecommendations,
+                 '/movies/recommendations/SVD/<string:title>')
+
+class NmfRecommendations(Resource):
+    def get(self, title):
+        print('title', title)
+        iid = movie_titles.loc[movie_titles['title']
+                               == title, 'movieId'].item()
+        print(iid)
+
+        # all ratings for selected title
+        title_user_rating = nmf_movie_matrix[iid]
+        print('title_user_rating',title_user_rating)
+        # correlation to title
+        similar_to_title = nmf_movie_matrix.corrwith(title_user_rating)
         print(similar_to_title)
         # drop null values from matrix and transform correlation results into DataFrame
         corr_title = pd.DataFrame(
@@ -115,7 +156,7 @@ class SvdRecommendations(Resource):
         else:
             return {'recommendations': json_object}
 
-api.add_resource(SvdRecommendations, '/movies/recommendations/SVD/<string:title>')
+api.add_resource(NmfRecommendations, '/movies/recommendations/NMF/<string:title>')
 
 
 class Movies(Resource):
