@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as mp
+import numpy as np
 from surprise import Reader, Dataset
 from surprise.model_selection import train_test_split
 from surprise import SVD, evaluate
