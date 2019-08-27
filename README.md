@@ -24,4 +24,4 @@ TECHNOLOGIES USED:
   fastai
   surprise
   
-Thanks to https://towardsdatascience.com for some great tutorials!
+Thanks to https://towardsdatascience.com for the tutorials and MovieLens for the sample dataset.
