@@ -9,5 +9,19 @@ GETTING STARTED
 Installations
 - Python 3
 
-pip install -r requirements.txt
+  pip install -r requirements.txt
+  
+RUN
 
+  python3 app.py
+
+
+TECHNOLOGIES USED:
+  Python3
+  Flask
+  pandas
+  numpy
+  fastai
+  surprise
+  
+Thanks to https://towardsdatascience.com for some great tutorials!
