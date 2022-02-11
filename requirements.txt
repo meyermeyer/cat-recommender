@@ -53,7 +53,7 @@ Pillow==6.1.0
 pipenv==2018.11.26
 plac==0.9.6
 preshed==2.0.1
-protobuf==3.9.1
+protobuf==3.15.0
 psycopg2==2.8.2
 psycopg2-binary==2.8.2
 pycodestyle==2.5.0
